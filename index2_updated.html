@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAULTWOOD — Hidden in Plain Sight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --midnight:#0E0E0E; --walnut:#3B2C23; --bronze:#8B6B45; --gold:#B89A68; --ivory:#F5F1EB; --gold-line:rgba(184,154,104,0.3); }
+  html { scroll-behavior: smooth; }
+  body { background:var(--midnight); color:var(--ivory); font-family:'Inter',sans-serif; font-weight:300; font-size:16px; line-height:1.7; overflow-x:hidden; }
+  #loader { position:fixed; inset:0; background:var(--midnight); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:28px; transition:opacity .8s ease, visibility .8s ease; }
+  #loader.hidden { opacity:0; visibility:hidden; }
+  .loader-logo { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; letter-spacing:.35em; color:var(--gold); opacity:0; animation:fadeUp .8s ease .3s forwards; }
+  .loader-line { width:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); animation:expandLine 1.4s ease .5s forwards; }
+  .loader-sub { font-size:11px; letter-spacing:.25em; color:rgba(184,154,104,.5); text-transform:uppercase; opacity:0; animation:fadeUp .8s ease 1s forwards; }
+  @keyframes expandLine { from{width:0} to{width:120px} }
+  @keyframes fadeUp { from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)} }
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:28px 60px; display:flex; align-items:center; justify-content:space-between; transition:background .5s ease,padding .4s ease; }
+  nav.scrolled { background:rgba(14,14,14,.92); backdrop-filter:blur(12px); padding:18px 60px; border-bottom:1px solid var(--gold-line); }
+  .nav-logo { font-family:'Cormorant Garamond',serif; font-size:18px; letter-spacing:.4em; color:var(--ivory); text-decoration:none; text-transform:uppercase; }
+  .nav-links { display:flex; gap:44px; list-style:none; }
+  .nav-links a { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,241,235,.6); text-decoration:none; transition:color .3s; position:relative; }
+  .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1px; background:var(--gold); transition:width .3s ease; }
+  .nav-links a:hover { color:var(--ivory); }
+  .nav-links a:hover::after { width:100%; }
+  .nav-cta { font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--midnight); background:var(--gold); padding:18px 42px; text-decoration:none; position:relative; overflow:hidden; border:1px solid var(--gold); transition:letter-spacing .4s ease, transform .4s cubic-bezier(.25,.8,.25,1), box-shadow .4s ease, background .4s ease; }
+  .nav-cta::before { content:''; position:absolute; top:0; left:-75%; width:50%; height:100%; background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent); transform:skewX(-20deg); transition:left .7s ease; }
+  .nav-cta:hover { background:linear-gradient(135deg,#d9bd82,var(--gold),#f3e2b8); letter-spacing:.28em; transform:scale(1.07); box-shadow:0 10px 34px rgba(184,154,104,.55); }
+  .nav-cta:hover::before { left:125%; }
+  #hero { position:relative; height:100vh; min-height:700px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:var(--midnight); }
+  .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .hero-overlay { position:absolute; inset:0; background:rgba(8,7,6,.45); }
+  .door-light { position:absolute; top:0; left:62%; width:2px; height:100%; background:linear-gradient(to bottom,transparent 0%,rgba(184,154,104,.06) 20%,rgba(184,154,104,.18) 50%,rgba(184,154,104,.06) 80%,transparent 100%); box-shadow:0 0 40px 20px rgba(184,154,104,.05); animation:doorLight 3s ease-in-out infinite alternate; }
+  @keyframes doorLight { from{opacity:.4} to{opacity:1} }
+  .door-panel { position:absolute; top:0; bottom:0; left:62%; right:0; background:linear-gradient(to right,rgba(59,44,35,.05) 0%,rgba(59,44,35,.02) 100%); border-left:1px solid rgba(184,154,104,.12); }
+  .hero-content { position:relative; z-index:2; text-align:left; padding:0 60px; max-width:1200px; width:100%; margin:0 auto; }
+  .hero-eyebrow { font-size:11px; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); margin-bottom:36px; opacity:0; animation:fadeUp 1s ease 1.6s forwards; }
+  .hero-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(58px,7vw,100px); font-weight:300; line-height:.95; letter-spacing:-.01em; color:var(--ivory); margin-bottom:32px; opacity:0; animation:fadeUp 1s ease 1.8s forwards; }
+  .hero-headline em { font-style:italic; color:var(--gold); }
+  .hero-subline { font-size:15px; font-weight:300; letter-spacing:.06em; color:rgba(245,241,235,.72); margin-bottom:60px; max-width:380px; opacity:0; animation:fadeUp 1s ease 2s forwards; }
+  .hero-ctas { display:flex; gap:20px; opacity:0; animation:fadeUp 1s ease 2.2s forwards; }
+  .cta-primary { display:inline-block; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--midnight); background:var(--gold); padding:18px 40px; text-decoration:none; transition:all .35s ease; position:relative; overflow:hidden; }
+  .cta-primary::after { content:''; position:absolute; inset:0; background:var(--ivory); transform:translateX(-100%); transition:transform .35s ease; }
+  .cta-primary:hover::after { transform:translateX(0); }
+  .cta-primary span { position:relative; z-index:1; }
+  .cta-ghost { display:inline-flex; align-items:center; gap:12px; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--ivory); text-decoration:none; padding:18px 0; border-bottom:1px solid rgba(245,241,235,.3); transition:all .3s ease; }
+  .cta-ghost:hover { color:var(--gold); border-color:var(--gold); gap:18px; }
+  .cta-ghost::after { content:'→'; }
+  .hero-scroll-hint { position:absolute; bottom:40px; left:60px; display:flex; align-items:center; gap:14px; opacity:0; animation:fadeUp 1s ease 2.6s forwards; }
+  .scroll-line { width:40px; height:1px; background:var(--gold-line); animation:scrollPulse 2s ease-in-out infinite; }
+  @keyframes scrollPulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+  .scroll-text { font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:rgba(184,154,104,.5); }
+  section { position:relative; }
+  .container { max-width:1200px; margin:0 auto; padding:0 60px; }
+  .section-eyebrow { font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--gold); margin-bottom:24px; }
+  .section-heading { font-family:'Cormorant Garamond',serif; font-size:clamp(38px,4.5vw,62px); font-weight:300; line-height:1.1; color:var(--ivory); margin-bottom:28px; }
+  .section-heading em { font-style:italic; color:var(--gold); }
+  .section-body { font-size:15px; font-weight:300; line-height:1.9; color:rgba(245,241,235,.6); max-width:520px; }
+  .reveal { opacity:0; transform:translateY(32px); transition:opacity .9s ease, transform .9s ease; }
+  .reveal.visible { opacity:1; transform:none; }
+  .reveal-delay-1 { transition-delay:.1s; } .reveal-delay-2 { transition-delay:.2s; } .reveal-delay-3 { transition-delay:.35s; }
+  #brand-story { padding:140px 0; background:var(--midnight); }
+  .story-grid { display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center; }
+  .story-visual { position:relative; aspect-ratio:3/4; max-height:600px; }
+  .story-visual-inner { position:absolute; inset:0; background:linear-gradient(135deg,#1a100a 0%,#2d1e14 40%,#3B2C23 100%); overflow:hidden; }
+  .story-visual-border { position:absolute; inset:20px; border:1px solid var(--gold-line); pointer-events:none; }
+  .story-visual-label { position:absolute; bottom:-1px; left:20px; right:20px; padding:16px 20px; background:var(--walnut); border-top:1px solid var(--gold-line); }
+  .story-visual-label span { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(184,154,104,.7); }
+  .story-visual::after { content:''; position:absolute; top:0; right:-1px; bottom:0; width:3px; background:linear-gradient(to bottom,transparent,rgba(184,154,104,.4) 30%,rgba(184,154,104,.5) 50%,rgba(184,154,104,.4) 70%,transparent); box-shadow:2px 0 20px rgba(184,154,104,.15); }
+  .story-quote { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; letter-spacing:.08em; color:var(--gold); margin-bottom:52px; display:flex; align-items:center; gap:18px; }
+  .story-quote::before { content:''; width:40px; height:1px; background:var(--gold); flex-shrink:0; }
+  .story-manifesto { font-family:'Cormorant Garamond',serif; font-size:clamp(32px,3.5vw,48px); font-weight:300; line-height:1.2; color:var(--ivory); margin-bottom:40px; }
+  .story-manifesto em { font-style:italic; color:var(--gold); }
+  .story-p { color:rgba(245,241,235,.55); font-size:15px; line-height:1.9; margin-bottom:20px; }
+  .story-signature { margin-top:52px; padding-top:36px; border-top:1px solid var(--gold-line); display:flex; gap:52px; }
+  .sig-num { font-family:'Cormorant Garamond',serif; font-size:42px; font-weight:300; color:var(--gold); line-height:1; }
+  .sig-label { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,241,235,.4); margin-top:6px; }
+  #featured-product { padding:140px 0; background:linear-gradient(to bottom,var(--midnight),#0a0806,var(--midnight)); overflow:hidden; }
+  .product-intro { text-align:center; margin-bottom:90px; }
+  .product-display { display:grid; grid-template-columns:1fr 1.1fr; gap:0; min-height:600px; }
+  .product-visual-wrap { position:relative; overflow:hidden; }
+  .product-visual { position:absolute; inset:0; background:linear-gradient(160deg,#1c1008 0%,#2d1e14 50%,#3B2C23 100%); display:flex; align-items:center; justify-content:center; }
+  .product-visual-wrap::after { content:''; position:absolute; right:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,transparent,rgba(184,154,104,.6) 40%,rgba(184,154,104,.7) 50%,rgba(184,154,104,.6) 60%,transparent); box-shadow:0 0 30px 10px rgba(184,154,104,.08); z-index:2; }
+  .product-info { padding:80px 70px; display:flex; flex-direction:column; justify-content:center; background:#0a0806; border:1px solid rgba(184,154,104,.08); border-left:none; }
+  .product-name { font-family:'Cormorant Garamond',serif; font-size:13px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
+  .product-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(36px,3.5vw,52px); font-weight:300; line-height:1.1; color:var(--ivory); margin-bottom:30px; }
+  .product-headline em { font-style:italic; }
+  .product-desc { color:rgba(245,241,235,.55); font-size:15px; line-height:1.9; margin-bottom:40px; }
+  .product-specs { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-bottom:52px; border:1px solid var(--gold-line); }
+  .spec-item { padding:20px 24px; border-right:1px solid var(--gold-line); border-bottom:1px solid var(--gold-line); }
+  .spec-item:nth-child(even){border-right:none} .spec-item:last-child,.spec-item:nth-last-child(2):nth-child(odd){border-bottom:none}
+  .spec-label { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:rgba(184,154,104,.6); margin-bottom:6px; }
+  .spec-value { font-size:14px; color:var(--ivory); font-weight:300; }
+  #why-hidden { padding:160px 0; background:var(--walnut); position:relative; overflow:hidden; }
+  #why-hidden::before { content:''; position:absolute; inset:0; background-image:url('./Images/Library.png'); background-size:cover; background-position:center; filter:brightness(.60) saturate(.80) contrast(1.05); }
+  #why-hidden::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(14,14,14,.75) 0%,rgba(59,44,35,.5) 50%,rgba(14,14,14,.6) 100%); }
+  #why-hidden .container { position:relative; z-index:2; }
+  .why-grid { display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:start; margin-top:80px; }
+  .why-right { display:flex; flex-direction:column; gap:52px; }
+  .why-item { border-top:1px solid rgba(184,154,104,.25); padding-top:32px; }
+  .why-num { font-family:'Cormorant Garamond',serif; font-size:13px; color:rgba(184,154,104,.5); letter-spacing:.1em; margin-bottom:14px; }
+  .why-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--ivory); margin-bottom:12px; }
+  .why-body { font-size:14px; color:rgba(245,241,235,.55); line-height:1.85; }
+  .why-large-text { font-family:'Cormorant Garamond',serif; font-size:clamp(48px,6vw,80px); font-weight:300; line-height:1.05; color:var(--ivory); position:sticky; top:100px; }
+  .why-large-text em { display:block; font-style:italic; color:var(--gold); }
+  #inspiration { padding:140px 0; background:var(--midnight); }
+  .insp-intro { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:70px; }
+  .insp-intro-left { max-width:500px; }
+  .insp-link { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); text-decoration:none; display:flex; align-items:center; gap:10px; transition:gap .3s; }
+  .insp-link:hover { gap:16px; }
+  .insp-grid { display:grid; grid-template-columns:1.4fr 1fr 1fr; grid-template-rows:300px 260px; gap:3px; }
+  .insp-cell { position:relative; overflow:hidden; cursor:pointer; }
+  .insp-cell.tall { grid-row:1/3; }
+  .insp-cell-bg { position:absolute; inset:0; transition:transform .7s ease; overflow:hidden; }
+  .insp-cell:hover .insp-cell-bg { transform:scale(1.05); }
+
+  .insp-cell::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.25),rgba(0,0,0,.03));
+    pointer-events:none;
+  }
+
+  .insp-deco { position:absolute; inset:30px; border:1px solid rgba(184,154,104,.08); pointer-events:none; }
+  .insp-cell-label { position:absolute; bottom:0; left:0; right:0; padding:20px 24px; background:linear-gradient(to top,rgba(0,0,0,.7),transparent); opacity:0; transition:opacity .4s ease; display:flex; flex-direction:column; }
+  .insp-cell:hover .insp-cell-label { opacity:1; }
+  .insp-cell-label span { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(184,154,104,.8); }
+  .insp-cell-label strong { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--ivory); margin-top:4px; }
+  #design-process { padding:160px 0; background:#080604; position:relative; overflow:hidden; }
+  #design-process::before { content:''; position:absolute; inset:0; background-image:url('./Images/Process.png'); background-size:cover; background-position:center; filter:brightness(.35) saturate(.70) contrast(1.05); pointer-events:none; }
+  #design-process .container { position:relative; z-index:1; }
+  .process-intro { margin-bottom:100px; }
+  .process-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--gold-line); }
+  .process-step { padding:52px 40px; border-right:1px solid var(--gold-line); position:relative; transition:background .4s ease; }
+  .process-step:last-child { border-right:none; }
+  .process-step::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); transform:scaleX(0); transform-origin:left; transition:transform .5s ease; }
+  .process-step:hover { background:rgba(59,44,35,.3); }
+  .process-step:hover::before { transform:scaleX(1); }
+  .ps-roman { font-family:'Cormorant Garamond',serif; font-size:13px; font-style:italic; color:rgba(184,154,104,.4); margin-bottom:32px; }
+  .ps-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--ivory); margin-bottom:16px; line-height:1.2; }
+  .ps-body { font-size:13px; color:rgba(245,241,235,.45); line-height:1.8; }
+  #future { padding:160px 0; background:var(--midnight); text-align:center; }
+  .future-inner { max-width:800px; margin:0 auto; }
+  .future-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(44px,5.5vw,78px); font-weight:300; line-height:1.1; color:var(--ivory); margin-bottom:36px; }
+  .future-headline em { font-style:italic; color:var(--gold); }
+  .future-body { color:rgba(245,241,235,.5); font-size:16px; line-height:1.9; max-width:600px; margin:0 auto 60px; }
+  .future-tags { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:80px; }
+  .future-tag { font-size:10px; letter-spacing:.25em; text-transform:uppercase; color:rgba(184,154,104,.7); border:1px solid rgba(184,154,104,.2); padding:10px 22px; transition:all .3s; }
+  .future-tag:hover { background:rgba(184,154,104,.08); color:var(--gold); border-color:rgba(184,154,104,.5); }
+  .future-divider { width:1px; height:80px; background:linear-gradient(to bottom,transparent,var(--gold),transparent); margin:0 auto 80px; }
+  #lead-gen { padding:0; background:var(--midnight); }
+  .lead-outer { background:linear-gradient(135deg,#0a0806 0%,var(--walnut) 100%); border-top:1px solid var(--gold-line); border-bottom:1px solid var(--gold-line); padding:120px 60px; }
+  .lead-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center; }
+  .lead-heading { font-family:'Cormorant Garamond',serif; font-size:clamp(44px,4.5vw,64px); font-weight:300; line-height:1.1; color:var(--ivory); margin-bottom:28px; }
+  .lead-heading em { font-style:italic; color:var(--gold); }
+  .lead-body { color:rgba(245,241,235,.55); font-size:15px; line-height:1.9; margin-bottom:44px; }
+  .lead-trust { display:flex; gap:32px; }
+  .trust-item { display:flex; align-items:center; gap:10px; }
+  .trust-dot { width:6px; height:6px; background:var(--gold); border-radius:50%; }
+  .trust-text { font-size:12px; color:rgba(245,241,235,.45); letter-spacing:.08em; }
+  .form-field { margin-bottom:20px; }
+  .form-field label { display:block; font-size:10px; letter-spacing:.25em; text-transform:uppercase; color:rgba(184,154,104,.7); margin-bottom:10px; }
+  .form-field input,.form-field select,.form-field textarea { width:100%; background:rgba(245,241,235,.04); border:1px solid rgba(184,154,104,.2); color:var(--ivory); font-family:'Inter',sans-serif; font-size:14px; font-weight:300; padding:16px 20px; outline:none; transition:border-color .3s; appearance:none; }
+  .form-field input:focus,.form-field select:focus,.form-field textarea:focus { border-color:var(--gold); }
+  .form-field textarea { resize:none; height:100px; }
+  .form-field select option { background:var(--walnut); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-submit { width:100%; background:var(--gold); color:var(--midnight); border:none; font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.25em; text-transform:uppercase; padding:22px; cursor:pointer; transition:all .35s ease; margin-top:8px; position:relative; overflow:hidden; }
+  .form-submit::after { content:''; position:absolute; inset:0; background:var(--ivory); transform:translateX(-100%); transition:transform .35s ease; }
+  .form-submit:hover::after { transform:translateX(0); }
+  .form-submit span { position:relative; z-index:1; }
+  .form-privacy { text-align:center; margin-top:16px; font-size:11px; color:rgba(245,241,235,.3); letter-spacing:.05em; }
+  footer { background:#070605; border-top:1px solid var(--gold-line); padding:80px 60px 50px; }
+  .footer-inner { max-width:1200px; margin:0 auto; }
+  .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:60px; margin-bottom:70px; }
+  .footer-logo { font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:.4em; color:var(--ivory); text-transform:uppercase; margin-bottom:20px; }
+  .footer-tagline { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
+  .footer-desc { font-size:13px; color:rgba(245,241,235,.35); line-height:1.8; max-width:280px; }
+  .footer-col-title { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:rgba(184,154,104,.6); margin-bottom:24px; }
+  .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .footer-col a { font-size:13px; color:rgba(245,241,235,.4); text-decoration:none; transition:color .3s; }
+  .footer-col a:hover { color:var(--gold); }
+  .footer-bottom { border-top:1px solid rgba(184,154,104,.1); padding-top:32px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-copyright { font-size:11px; color:rgba(245,241,235,.25); letter-spacing:.08em; }
+  .footer-legal { display:flex; gap:32px; }
+  .footer-legal a { font-size:11px; color:rgba(245,241,235,.25); text-decoration:none; transition:color .3s; }
+  .footer-legal a:hover { color:rgba(245,241,235,.5); }
+  @media (max-width:900px) { nav{padding:22px 28px} nav.scrolled{padding:16px 28px} .nav-links{display:none} .container{padding:0 28px} .hero-content{padding:0 28px} .story-grid,.why-grid,.lead-inner{grid-template-columns:1fr;gap:60px} .story-visual{max-height:350px} .why-large-text{position:static;font-size:52px} .product-display{grid-template-columns:1fr} .product-visual-wrap{height:380px} .product-info{padding:52px 32px} .insp-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto} .insp-cell.tall{grid-row:auto} .process-steps{grid-template-columns:1fr 1fr} .process-step{border-right:none;border-bottom:1px solid var(--gold-line)} .process-step:nth-child(odd){border-right:1px solid var(--gold-line)} .footer-top{grid-template-columns:1fr 1fr;gap:40px} .form-row{grid-template-columns:1fr} .lead-outer{padding:80px 28px} footer{padding:60px 28px 40px} .hero-scroll-hint{left:28px} }
+  @media (max-width:600px) { .hero-ctas{flex-direction:column;gap:28px} .process-steps{grid-template-columns:1fr} .process-step:nth-child(odd){border-right:none} .footer-top{grid-template-columns:1fr} .footer-bottom{flex-direction:column;gap:20px;text-align:center} .insp-grid{grid-template-columns:1fr} .lead-inner{grid-template-columns:1fr} .lead-trust{flex-direction:column;gap:14px} .product-specs{grid-template-columns:1fr} .spec-item{border-right:none!important} .story-signature{flex-direction:column;gap:32px} .future-tags{gap:8px} .insp-intro{flex-direction:column;align-items:flex-start;gap:24px} }
+</style>
+</head>
+<body>
+<div id="loader"><div class="loader-logo">VAULTWOOD</div><div class="loader-line"></div><div class="loader-sub">Hidden in Plain Sight</div></div>
+<nav id="nav"><a href="#" class="nav-logo">Vaultwood</a><ul class="nav-links"><li><a href="#brand-story">Our Story</a></li><li><a href="#featured-product">Hidden Doors</a></li><li><a href="#design-process">Process</a></li><li><a href="#lead-gen">Enquire</a></li></ul><a href="#lead-gen" class="nav-cta">Design Your World</a></nav>
+<section id="hero"><video class="hero-video" autoplay muted loop playsinline poster="./Images/Hero.png"><source src="./Video/Headervideo-Vaultwood.mp4" type="video/mp4"></video><div class="hero-overlay"></div><div class="door-panel"></div><div class="door-light"></div><div class="hero-content"><p class="hero-eyebrow">Est. — Bespoke Hidden Interiors</p><h1 class="hero-headline">Hidden in<br><em>Plain Sight.</em></h1><p class="hero-subline">Not every room needs to be seen.</p><div class="hero-ctas"><a href="#lead-gen" class="cta-primary"><span>Design Your Private World</span></a><a href="#featured-product" class="cta-ghost">Discover Hidden Doors</a></div></div><div class="hero-scroll-hint"><div class="scroll-line"></div><span class="scroll-text">Enter</span></div></section>
+<section id="brand-story"><div class="container"><div class="story-grid"><div class="story-visual reveal"><div class="story-visual-inner"><img src="./Images/Story.png" alt="Hidden bookshelf door" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(0.90) saturate(1.05) contrast(1.05);"></div><div class="story-visual-border"></div><div class="story-visual-label"><span>The Hidden Bookshelf — Signature Series</span></div></div><div class="story-text"><p class="story-quote reveal">We don't build doors. We build worlds.</p><h2 class="story-manifesto reveal reveal-delay-1">A private club<br><em>hidden inside</em><br>your own home.</h2><p class="story-p reveal reveal-delay-2">Every great home has rooms that are known. Vaultwood exists for the room that isn't. The space behind the shelf, beyond the panel — yours alone.</p><p class="story-p reveal reveal-delay-2">We design hidden interiors with the same obsession for material and proportion that defines the finest automobiles and timepieces. Nothing is mass-produced. Nothing is assumed. Every installation begins with a conversation.</p><div class="story-signature reveal reveal-delay-3"><div class="sig-item"><div class="sig-num">100%</div><div class="sig-label">Bespoke</div></div><div class="sig-item"><div class="sig-num">14+</div><div class="sig-label">Countries</div></div><div class="sig-item"><div class="sig-num">∞</div><div class="sig-label">Configurations</div></div></div></div></div></div></section>
+<section id="featured-product"><div class="container"><div class="product-intro"><p class="section-eyebrow reveal">Featured — The Signature Collection</p><h2 class="section-heading reveal reveal-delay-1">A bookshelf that opens to<br><em>something extraordinary.</em></h2></div></div><div style="max-width:1200px;margin:0 auto;padding:0 60px;"><div class="product-display"><div class="product-visual-wrap reveal"><div class="product-visual" style="padding:0;"><img src="./Images/Bookshelf.png" alt="Hidden bookshelf storage" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(0.92) saturate(1.05) contrast(1.05);"></div></div><div class="product-info reveal reveal-delay-2"><p class="product-name">The Hidden Bookshelf</p><h3 class="product-headline">Built to <em>conceal</em>.<br>Designed to impress.</h3><p class="product-desc">A refined bookshelf with a hidden compartment for the things that deserve discretion. Watches, documents, valuables and personal objects, concealed inside a piece of furniture that feels built for a private club.</p><div class="product-specs"><div class="spec-item"><div class="spec-label">Material</div><div class="spec-value">Solid Walnut & Oak</div></div><div class="spec-item"><div class="spec-label">Opening</div><div class="spec-value">Hidden Drop Panel</div></div><div class="spec-item"><div class="spec-label">Storage</div><div class="spec-value">Watches & Valuables</div></div><div class="spec-item"><div class="spec-label">Finish</div><div class="spec-value">Bespoke Interior</div></div></div><a href="#lead-gen" class="cta-primary"><span>Request a Private Consultation</span></a></div></div></div></section>
+<section id="why-hidden"><div class="container"><p class="section-eyebrow reveal">The Philosophy</p><div class="why-grid"><div class="why-left"><div class="why-large-text reveal">Every home<br>deserves a<br><em>plot twist.</em></div></div><div class="why-right"><div class="why-item reveal"><div class="why-num">I</div><div class="why-title">Privacy Redefined</div><p class="why-body">A space that only you can enter. No staff. No guests. No interruptions. Vaultwood installations return something increasingly rare: a room that is entirely, unconditionally yours.</p></div><div class="why-item reveal reveal-delay-1"><div class="why-num">II</div><div class="why-title">The Thrill of Discovery</div><p class="why-body">There is a particular pleasure in knowing what others do not. The hidden door is not a secret you share — it's one you keep. That dynamic shapes every space we create.</p></div><div class="why-item reveal reveal-delay-2"><div class="why-num">III</div><div class="why-title">Architecture as Identity</div><p class="why-body">The finest homes make a statement before a word is spoken. A Vaultwood interior communicates taste, discretion, and imagination — the hallmarks of a life lived with intention.</p></div><div class="why-item reveal reveal-delay-3"><div class="why-num">IV</div><div class="why-title">Built Without Compromise</div><p class="why-body">We work with master craftsmen and architectural-grade materials. There are no shortcuts here. The tolerances we hold are measured in millimetres, the finishes in decades.</p></div></div></div></div></section>
+<section id="inspiration"><div class="container"><div class="insp-intro"><div class="insp-intro-left"><p class="section-eyebrow reveal">Hidden Spaces</p><h2 class="section-heading reveal reveal-delay-1">Designed for spaces<br><em>worth hiding.</em></h2></div><a href="#lead-gen" class="insp-link reveal reveal-delay-2">View All Concepts →</a></div><div class="insp-grid reveal"><div class="insp-cell tall"><div class="insp-cell-bg"><img src="./Images/Library.png" alt="Dark luxury library study" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.95) saturate(1.05) contrast(1.08);"></div><div class="insp-deco"></div><div class="insp-cell-label"><span>Hidden Study</span><strong>The Library</strong></div></div><div class="insp-cell"><div class="insp-cell-bg"><img src="./Images/Mancave.jpg" alt="Mancave hidden room" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.95) saturate(1.05) contrast(1.08);"></div><div class="insp-deco"></div><div class="insp-cell-label"><span>Secret Bar</span><strong>The Prohibition</strong></div></div><div class="insp-cell"><div class="insp-cell-bg"><img src="./Images/Closed_Open_door.png" alt="Hidden open door" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.95) saturate(1.05) contrast(1.08);"></div><div class="insp-deco"></div><div class="insp-cell-label"><span>Safe Room</span><strong>The Vault</strong></div></div><div class="insp-cell"><div class="insp-cell-bg"><img src="./Images/Mirror.png" alt="Mirror hidden door" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.95) saturate(1.05) contrast(1.08);"></div><div class="insp-deco"></div><div class="insp-cell-label"><span>Mirror Door</span><strong>The Reflection</strong></div></div><div class="insp-cell"><div class="insp-cell-bg"><img src="./Images/Bookshelf.png" alt="Hidden bookshelf valuables" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.95) saturate(1.05) contrast(1.08);"></div><div class="insp-deco"></div><div class="insp-cell-label"><span>Secret Storage</span><strong>The Collector</strong></div></div></div></div></section>
+<section id="design-process"><div class="container"><div class="process-intro"><p class="section-eyebrow reveal">The Process</p><h2 class="section-heading reveal reveal-delay-1">From first conversation<br>to <em>first reveal.</em></h2><p class="section-body reveal reveal-delay-2">Every Vaultwood installation is unique. It begins with listening — to your space, your vision, and the life you intend to live inside it.</p></div><div class="process-steps reveal"><div class="process-step"><div class="ps-roman">i.</div><div class="ps-title">Discovery Call</div><p class="ps-body">A private conversation to understand your space, intentions, and the experience you're creating. No obligation. Complete discretion.</p></div><div class="process-step"><div class="ps-roman">ii.</div><div class="ps-title">Architectural Brief</div><p class="ps-body">Our design team develops a detailed proposal tailored to your existing architecture, preferred materials, and access mechanism.</p></div><div class="process-step"><div class="ps-roman">iii.</div><div class="ps-title">Master Craft</div><p class="ps-body">Handcrafted using solid hardwood, precision metalwork, and bespoke hardware. Every element built to outlast fashion.</p></div><div class="process-step"><div class="ps-roman">iv.</div><div class="ps-title">The First Reveal</div><p class="ps-body">Installation by a specialist team, followed by a private handover. The moment your world opens is ours to give you.</p></div></div></div></section>
+<section id="future"><div class="container"><div class="future-inner"><p class="section-eyebrow reveal" style="text-align:center">The Vaultwood World</p><h2 class="future-headline reveal reveal-delay-1">This is only<br>the <em>beginning.</em></h2><p class="future-body reveal reveal-delay-2">Hidden doors are our foundation. What we are building is a world — a lifestyle ecosystem for men who demand the exceptional in every room, on every surface, with every object they choose to live with.</p><div class="future-tags reveal reveal-delay-3"><span class="future-tag">Hidden Furniture</span><span class="future-tag">Secret Shelving</span><span class="future-tag">Whiskey Accessories</span><span class="future-tag">Wooden Luxury Objects</span><span class="future-tag">Gentlemen's Collections</span><span class="future-tag">Premium Gift Editions</span></div><div class="future-divider reveal"></div><blockquote style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,46px);font-weight:300;font-style:italic;color:var(--ivory);line-height:1.2;" class="reveal">"For those who prefer<br>the exceptional."</blockquote></div></div></section>
+<section id="lead-gen"><div class="lead-outer"><div class="lead-inner"><div class="lead-left"><p class="section-eyebrow reveal">Private Consultation</p><h2 class="lead-heading reveal reveal-delay-1">Unlock your<br><em>private world.</em></h2><p class="lead-body reveal reveal-delay-2">Every Vaultwood project begins with a conversation. Tell us about your space and vision — we'll handle everything else. Consultations are complimentary and conducted in complete confidence.</p><div class="lead-trust reveal reveal-delay-3"><div class="trust-item"><div class="trust-dot"></div><span class="trust-text">Fully confidential</span></div><div class="trust-item"><div class="trust-dot"></div><span class="trust-text">No obligation</span></div><div class="trust-item"><div class="trust-dot"></div><span class="trust-text">Global delivery</span></div></div></div><div class="lead-right reveal reveal-delay-2"><div class="lead-form"><div class="form-row"><div class="form-field"><label for="fname">First Name</label><input type="text" id="fname" placeholder="James"></div><div class="form-field"><label for="lname">Last Name</label><input type="text" id="lname" placeholder="Sterling"></div></div><div class="form-field"><label for="email">Email Address</label><input type="email" id="email" placeholder="james@sterling.com"></div><div class="form-field"><label for="project">Project Type</label><select id="project"><option value="">Select your vision</option><option>Hidden Bookshelf Door</option><option>Secret Room / Safe Room</option><option>Hidden Bar or Cellar</option><option>Full Hidden Interior Concept</option><option>Other Bespoke Project</option></select></div><div class="form-field"><label for="message">Tell Us About Your Space</label><textarea id="message" placeholder="Describe your home, your vision, or simply the feeling you want to create..."></textarea></div><button class="form-submit"><span>Request Private Consultation →</span></button><p class="form-privacy">Your enquiry is strictly private. We respond within 24 hours.</p></div></div></div></div></section>
+<footer><div class="footer-inner"><div class="footer-top"><div class="footer-brand"><div class="footer-logo">Vaultwood</div><div class="footer-tagline">Hidden in Plain Sight</div><p class="footer-desc">The world's first luxury hidden interior and gentlemen lifestyle brand. Built for those who prefer the exceptional.</p></div><div class="footer-col"><div class="footer-col-title">Interiors</div><ul><li><a href="#">Hidden Doors</a></li><li><a href="#">Secret Rooms</a></li><li><a href="#">Hidden Bars</a></li><li><a href="#">Bespoke Concepts</a></li></ul></div><div class="footer-col"><div class="footer-col-title">Studio</div><ul><li><a href="#">Our Process</a></li><li><a href="#">Materials</a></li><li><a href="#">Portfolio</a></li><li><a href="#">Journal</a></li></ul></div><div class="footer-col"><div class="footer-col-title">Contact</div><ul><li><a href="#">Private Consultation</a></li><li><a href="#">Trade Enquiries</a></li><li><a href="#">Press & Media</a></li><li><a href="#">Instagram</a></li></ul></div></div><div class="footer-bottom"><span class="footer-copyright">© 2026 Vaultwood. All rights reserved.</span><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Cookies</a></div></div></div></footer>
+<script>
+  window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('loader').classList.add('hidden')},1200)});
+  const nav=document.getElementById('nav'); window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>80)});
+  const revealEls=document.querySelectorAll('.reveal'); const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'}); revealEls.forEach(el=>observer.observe(el));
+  document.querySelector('.form-submit').addEventListener('click',function(e){e.preventDefault();const email=document.getElementById('email').value;const fname=document.getElementById('fname').value;if(!fname||!email){this.querySelector('span').textContent='Please fill in your name and email.';setTimeout(()=>{this.querySelector('span').textContent='Request Private Consultation →'},3000);return}this.querySelector('span').textContent='Enquiry Received — We\'ll be in touch.';this.style.background='var(--bronze)';});
+</script>
+</body>
+</html>
